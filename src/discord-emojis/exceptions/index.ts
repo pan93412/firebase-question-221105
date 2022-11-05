@@ -1,1 +1,1 @@
-export * from "./NoAccessToGuild";
+export * from "./NoAccessToGuild.js";

@@ -4,8 +4,8 @@ import { type Nominal } from 'nominal-types';
 export { Client, GatewayIntentBits };
 
 /**
- * The client that includes the {@see GatewayIntentBits.Guilds} and
- * {@see GatewayIntentBits.GuildEmojisAndStickers} intents.
+ * The client that includes the {@link GatewayIntentBits.Guilds} and
+ * {@link GatewayIntentBits.GuildEmojisAndStickers} intents.
  */
 export type ClientWithEmojiIntents = Nominal<'ClientWithEmojiIntents', Client>;
 

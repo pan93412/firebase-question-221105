@@ -1,5 +1,5 @@
-import { NoAccessToGuild } from "./exceptions";
-import { ClientWithEmojiIntents, DiscordEmojis } from "./types";
+import { NoAccessToGuild } from "./exceptions/index.js";
+import { ClientWithEmojiIntents, DiscordEmojis } from "./types/index.js";
 
 /**
  * Get all the customized emojis of a guild.

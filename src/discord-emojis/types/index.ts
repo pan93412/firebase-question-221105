@@ -1,3 +1,2 @@
-export * from "./DiscordEmoji";
-export * from "./DiscordClient";
-
+export * from "./DiscordEmoji.js";
+export * from "./DiscordClient.js";
