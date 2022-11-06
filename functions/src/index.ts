@@ -1,14 +1,37 @@
-// import * as functions from "firebase-functions";
 import { onCall, HttpsError, onRequest } from "firebase-functions/v2/https";
 import { getClientInstance } from "./discord.js";
 import { getDiscordEmoji } from "./discord-emojis/index.js";
 import { defineString } from "firebase-functions/params";
+import { standardizeError } from "./errorHandler.js";
 
-const discordToken = defineString("DISCORD_TOKEN");
-const stickerGuild = defineString("GUILD");
+const discordToken = defineString("DISCORD_TOKEN", {
+  description: "The bot token for sending request to Discord REST API.",
+});
+const stickerGuild = defineString("GUILD", {
+  description:
+    "The guild ID to operate on, for example: getting emojis, sending messages.",
+});
 
 /**
- * Get the stickers in a Discord guild.
+ * The key for running any special commands.
+ *
+ * It is strongly recommended to configure your own
+ * key for security reasons.
+ *
+ * @example C1SCC{_}V3_B@ck3nd
+ */
+const adminKey = defineString("ADMIN_KEY", {
+  description: "The key for running any special commands.",
+  default: "C1SCC{_}V3_B@ck3ndD3f@u1tP@s^2w0rd*w*",
+});
+
+const globalCache = new Map<string, string>();
+
+/**
+ * Get the emojis in a Discord guild.
+ *
+ * It will cache the emojis. You can pass a `X-Refresh-Cache: <ADMIN_KEY>`
+ * header to force a refresh.
  *
  * ## Request
  *
@@ -24,18 +47,36 @@ const stickerGuild = defineString("GUILD");
  *
  * ### 405 – Method not allowed
  *
- * ```json
- * {"error":"Method not allowed"}
- * ```
+ * No response.
  */
-export const getstickers = onRequest(async (req, res) => {
-  const discordClient = await getClientInstance(discordToken.value());
+export const getemojis = onRequest(async (req, res) => {
+  const cacheKey = "getstickers::emoji";
 
-  if (req.method === "GET") {
-    res.json(await getDiscordEmoji(discordClient, stickerGuild.value()));
+  if (req.method !== "GET") {
+    res.status(405).end();
+    return;
   }
 
-  res.status(405).send('{"error":"Method not allowed"}');
+  if (
+    !globalCache.has(cacheKey) ||
+    req.header("X-Refresh-Cache") === adminKey.value()
+  ) {
+    try {
+      const rest = await getClientInstance(discordToken.value());
+
+      if (req.method === "GET") {
+        const stickers = await getDiscordEmoji(rest, stickerGuild.value());
+        globalCache.set(cacheKey, JSON.stringify(stickers));
+      }
+    } catch (e) {
+      res.status(500).send(standardizeError(e));
+      return;
+    }
+  }
+
+  res
+    .header("Content-Type", "application/json")
+    .send(globalCache.get(cacheKey));
 });
 
 // Adds two numbers to each other.
@@ -50,7 +91,7 @@ export const addnumbers = onCall((request) => {
     throw new HttpsError(
       "invalid-argument",
       "The function must be called " +
-        "with two arguments \"firstNumber\" and \"secondNumber\" which " +
+        'with two arguments "firstNumber" and "secondNumber" which ' +
         "must both be numbers."
     );
   }

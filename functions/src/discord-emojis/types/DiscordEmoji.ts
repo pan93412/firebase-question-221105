@@ -1,21 +1,22 @@
+import { APIEmoji } from "discord-api-types/v10";
+
 /**
  * The structure representing a custom Discord emoji.
  */
- export type DiscordEmoji = {
+export interface DiscordEmoji extends APIEmoji {
   /**
-   * The ID of this emoji that can use
-   * directly in the message.
+   * The emoji ID for reference in messages.
    *
    * @example <:sticker_display_name:sticker_id>
    */
-  id: string;
+  uniqueMessageId: string;
 
   /**
-   * The URL of the emoji image.
+   * The address to sticker URL.
    *
    * @example https://cdn.discordapp.com/emojis/sticker_id.png
    */
-  url: string;
+  url?: string | null;
 }
 
 /**
